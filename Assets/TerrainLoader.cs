@@ -82,13 +82,17 @@ public class TerrainLoader : MonoBehaviour {
         {
             for (int x = 0; x <= tileSize; x++)
             {
-                if (x == tileSize)
+
+                if (x == tileSize && y == tileSize)
                 {
-                    terrainHeights[y, x] = 0.3f;//pixelByteArray[y * tileSize + x - 1].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[(y-1) * tileSize + (x - 1)].grayscale * intensity;
+                } else if (x == tileSize)
+                {
+                    terrainHeights[y, x] = pixelByteArray[y * tileSize + (x - 1)].grayscale * intensity;
                 }
                 else if (y == tileSize)
                 {
-                    terrainHeights[y, x] = 0.2f;//pixelByteArray[(y - 1) * tileSize + x].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale * intensity;
                 }
                 else
                 {

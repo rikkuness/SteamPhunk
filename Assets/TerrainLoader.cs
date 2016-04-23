@@ -42,6 +42,7 @@ public class TerrainLoader : MonoBehaviour {
 
     public int tileSize = 256;
     public int terrainSize = 256;
+    public int terrainResolution = 2560;
     public int terrainHeight = 100;
     public float intensity = 1f;
 
@@ -65,7 +66,7 @@ public class TerrainLoader : MonoBehaviour {
         tile.url = baseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
         WWW www = new WWW(tile.url);
         while (!www.isDone) { }
-        tile.heightmap = new Texture2D(tileSize, tileSize);
+        tile.heightmap = new Texture2D(tileSize/10, tileSize/10);
         www.LoadImageIntoTexture(tile.heightmap);
     
         // Multidimensional array of this tiles heights in x/y
@@ -73,27 +74,36 @@ public class TerrainLoader : MonoBehaviour {
 
         // Load colors into byte array
         Color[] pixelByteArray = tile.heightmap.GetPixels();
-    
+
+        
         // Iterate over the byte array and calculate heights
-        for (int y = 0; y <= tileSize; y++)
+        for (int y = 0; y <= terrainResolution; y++)
         {
-            for (int x = 0; x <= tileSize; x++)
+            for (int x = 0; x <= terrainResolution; x++)
             {
-                if (x == tileSize && y == tileSize)
+                int pixelX = (int)Mathf.Round(x / 10);
+                int pixelY= (int)Mathf.Round(y / 10);
+                if (x == terrainResolution && y == terrainResolution)
                 {
-                    terrainHeights[y, x] = pixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[(pixelY-1) * tileSize + (pixelX-1)].grayscale * intensity;
                 }
                 else if (x == tileSize)
                 {
-                    terrainHeights[y, x] = pixelByteArray[y * tileSize + (x - 1)].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[(pixelY) * tileSize + (pixelX-1)].grayscale * intensity;
                 }
                 else if (y == tileSize)
                 {
-                    terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[((pixelY-1) * tileSize) + pixelX].grayscale * intensity;
                 }
                 else
                 {
-                    terrainHeights[y, x] = pixelByteArray[y * tileSize + x].grayscale * intensity;
+                    try
+                    {
+                        terrainHeights[y, x] = pixelByteArray[pixelY * tileSize + pixelX].grayscale * intensity;
+                    }catch(Exception e)
+                    {
+                        Debug.Log(e);
+                    }
                 }
             }
         }
@@ -105,7 +115,7 @@ public class TerrainLoader : MonoBehaviour {
         terrainData.size = new Vector3(terrainSize, terrainHeight, terrainSize);
 
         tile.terrain = Terrain.CreateTerrainGameObject(terrainData);
-        tile.terrain.transform.position = new Vector3(tile.worldX * tileSize, 0, tile.worldZ * tileSize);
+        tile.terrain.transform.position = new Vector3(tile.worldX * terrainSize, 0, tile.worldZ * terrainSize);
 
         tile.terrain.name = "tile_" + tile.x.ToString() + "_" + tile.y.ToString();
 

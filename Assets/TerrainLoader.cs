@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq; // used for Sum of array
 using CSML;
+using TerrainStitch;
 
 [System.Serializable]
 public class TerrainTile
@@ -18,11 +19,11 @@ public class TerrainTile
     public int worldX;
     public int worldZ;
 
-    public TerrainTile(int tilex, int tiley, int tilez,int wldx,int wldz)  
+    public TerrainTile(int tilex, int tiley, int wldz, int wldx)  
     {
         x = tilex;
         y = tiley;
-        z = tilez;
+        z = 5;              // Hardcoded zoom level
         worldX = wldx;
         worldZ = wldz;
     }
@@ -199,6 +200,7 @@ public class TerrainLoader : MonoBehaviour {
         return Mathf.Pow((Mathf.Pow(first, power) + Mathf.Pow(second, power)) / 2.0f, 1 / power);
     }
 
+    /*
     IEnumerator setNeighbours()
     {
         foreach(TerrainTile tile in worldTiles.Values)
@@ -240,126 +242,59 @@ public class TerrainLoader : MonoBehaviour {
 
             //StitchTerrainsRepair(rightTerrain, leftTerrain, topTerrain, bottomTerrain);
 
-            try { setTextures(tile.terrain.GetComponent<Terrain>().terrainData); }catch{ }
-
-            tile.terrain.GetComponent<Terrain>().SetNeighbors(leftTerrain, topTerrain, rightTerrain, bottomTerrain);
+            try {
+                setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+                tile.terrain.GetComponent<Terrain>().SetNeighbors(leftTerrain, topTerrain, rightTerrain, bottomTerrain);
+            } catch{ }
         }
 
         yield return null;
     }
-
-    void StitchTerrains(Terrain terrain, Terrain second, Side side, bool smooth = true)
-    {
-        TerrainData terrainData = terrain.terrainData;
-        TerrainData secondData = second.terrainData;
-        
-        float[,] heights = terrainData.GetHeights(0, 0, terrainData.heightmapWidth, terrainData.heightmapHeight);
-        float[,] secondHeights = secondData.GetHeights(0, 0, secondData.heightmapWidth, secondData.heightmapHeight);
-        
-        if (side == Side.Right)
-        {
-            int y = heights.GetLength(0) - 1;
-            int x = 0;
-            int y2 = 0;
-            for (x = 0; x < heights.GetLength(1); x++)
-            {
-
-                heights[x, y] = average(heights[x, y], secondHeights[x, y2]);
-
-                if (smooth)
-                    heights[x, y] += Mathf.Abs(heights[x, y - 1] - secondHeights[x, y2 + 1]) / levelSmooth;
-
-                secondHeights[x, y2] = heights[x, y];
-
-                for (int i = 1; i < checkLength; i++)
-                {
-                    heights[x, y - i] = (average(heights[x, y - i], heights[x, y - i + 1]) + Mathf.Abs(heights[x, y - i] - heights[x, y - i + 1]) / levelSmooth) * (checkLength - i) / checkLength + heights[x, y - i] * i / checkLength;
-                    secondHeights[x, y2 + i] = (average(secondHeights[x, y2 + i], secondHeights[x, y2 + i - 1]) + Mathf.Abs(secondHeights[x, y2 + i] - secondHeights[x, y2 + i - 1]) / levelSmooth) * (checkLength - i) / checkLength + secondHeights[x, y2 + i] * i / checkLength;
-                }
-            }
-        }
-        else
-        {
-            if (side == Side.Top)
-            {
-                int y = 0;
-                int x = heights.GetLength(0) - 1;
-                int x2 = 0;
-                for (y = 0; y < heights.GetLength(1); y++)
-                {
-
-                    heights[x, y] = average(heights[x, y], secondHeights[x2, y]);
-
-                    if (smooth)
-                        heights[x, y] += Mathf.Abs(heights[x - 1, y] - secondHeights[x2 + 1, y]) / levelSmooth;
-
-
-                    secondHeights[x2, y] = heights[x, y];
-
-                    for (int i = 1; i < checkLength; i++)
-                    {
-                        heights[x - i, y] = (average(heights[x - i, y], heights[x - i + 1, y]) + Mathf.Abs(heights[x - i, y] - heights[x - i + 1, y]) / levelSmooth) * (checkLength - i) / checkLength + heights[x - i, y] * i / checkLength;
-                        secondHeights[x2 + i, y] = (average(secondHeights[x2 + i, y], secondHeights[x2 + i - 1, y]) + Mathf.Abs(secondHeights[x2 + i, y] - secondHeights[x2 + i - 1, y]) / levelSmooth) * (checkLength - i) / checkLength + secondHeights[x2 + i, y] * i / checkLength;
-                    }
-
-                }
-            }
-        }
-
-
-        terrainData.SetHeights(0, 0, heights);
-        terrain.terrainData = terrainData;
-
-        secondData.SetHeights(0, 0, secondHeights);
-        second.terrainData = secondData;
-
-        terrain.Flush();
-        second.Flush();
-    }
-
-    void StitchTerrainsRepair(Terrain terrain11, Terrain terrain21, Terrain terrain12, Terrain terrain22)
-    {
-        int size = terrain11.terrainData.heightmapHeight - 1;
-        int size0 = 0;
-        List<float> heights = new List<float>();
-        
-        heights.Add(terrain11.terrainData.GetHeights(size, size0, 1, 1)[0, 0]);
-        heights.Add(terrain21.terrainData.GetHeights(size0, size0, 1, 1)[0, 0]);
-        heights.Add(terrain12.terrainData.GetHeights(size, size, 1, 1)[0, 0]);
-        heights.Add(terrain22.terrainData.GetHeights(size0, size, 1, 1)[0, 0]);
-        
-        float[,] height = new float[1, 1];
-        height[0, 0] = heights.Max();
-
-        terrain11.terrainData.SetHeights(size, size0, height);
-        terrain21.terrainData.SetHeights(size0, size0, height);
-        terrain12.terrainData.SetHeights(size, size, height);
-        terrain22.terrainData.SetHeights(size0, size, height);
-
-        terrain11.Flush();
-        terrain12.Flush();
-        terrain21.Flush();
-        terrain22.Flush();
-    }
+    */
 
     void loadAllTerrain()
     {
         foreach(TerrainTile tile in worldTiles.Values)
         {
             StartCoroutine(loadTerrainTile(tile));
-            StartCoroutine(setNeighbours());
         }
+    }
+
+    void loadTilesAround(int z, int x)
+    {
+        /*      -1,-1   -1,0    -1,1
+         *       0,-1    0,0     0,1
+         *       1,-1    1,0     1,1
+         */
+
+        worldTiles["-1_-1"] = new TerrainTile(z+1,  x-1, -1, -1);
+        worldTiles["-1_0"] = new TerrainTile( z+1,  x,   -1,  0);
+        worldTiles["-1_1"] = new TerrainTile( z+1,  x+1, -1,  1);
+
+        worldTiles["0_-1"] = new TerrainTile( z,    x-1,  0, -1);
+        worldTiles["0_0"] = new TerrainTile(  z,    x,    0,  0);
+        worldTiles["0_1"] = new TerrainTile(  z,    x+1,  0,  1);
+
+        worldTiles["1_-1"] = new TerrainTile( z-1,  x-1,  1, -1);
+        worldTiles["1_0"] = new TerrainTile(  z-1,  x,    1,  0);
+        worldTiles["1_1"] = new TerrainTile(  z-1,  x+1,  1,  1);
     }
 
     // Use this for initialization
     void Start()
     {
-        worldTiles["0_0"] = new TerrainTile(9, 38, 5, 0, 0);
-        worldTiles["0_1"] = new TerrainTile(8, 38, 5, 0, 1);
-        worldTiles["1_0"] = new TerrainTile(9, 39, 5, 1, 0);
-        worldTiles["1_1"] = new TerrainTile(8, 39, 5, 1, 1);
+        // Load 3x3 grid centered around given x/y tile
+        loadTilesAround(12, 8);
 
         // Initial tile loading
         loadAllTerrain();
+
+        TerrainStitchEditor t = new TerrainStitchEditor();
+        t.StitchTerrain();
+
+        foreach(TerrainTile tile in worldTiles.Values)
+        {
+            setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+        }
     }
 }

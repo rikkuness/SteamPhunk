@@ -36,12 +36,14 @@ public class CuriosityControl : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
+
 		object controlState = null;
 		if (! IsRunningOnMono) {
 			controlState = GamePad.GetState (PlayerIndex.One);
 		}
-		// Forward and backwards movement
-		foreach (WheelMotor motor in motors)
+        //Debug.Log(((GamePadState)controlState).Buttons.Back == ButtonState.Pressed);
+        // Forward and backwards movement
+        foreach (WheelMotor motor in motors)
 		{
 			HingeJoint hinge = motor.motor.GetComponent<HingeJoint>();
 			JointMotor thisMotor = hinge.motor;

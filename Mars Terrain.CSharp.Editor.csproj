@@ -100,7 +100,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Editor\TerrainScaleEditor.cs" />
-    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Editor\TerrainStitchEditor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

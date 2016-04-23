@@ -68,8 +68,12 @@
   <ItemGroup>
     <Compile Include="Assets\ChaseCamera.cs" />
     <Compile Include="Assets\CuriosityControl.cs" />
+    <Compile Include="Assets\DayNightController.cs" />
+    <Compile Include="Assets\MinimapCameraScript.cs" />
+    <Compile Include="Assets\PointUtility.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\IntArrayComparer.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\TerrainNeighbours.cs" />
+    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\TerrainStitchEditor.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Third Party\Complex.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Third Party\Matrix.cs" />
     <Compile Include="Assets\TerrainLoader.cs" />

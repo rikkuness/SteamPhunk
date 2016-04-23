@@ -52,7 +52,7 @@ public class TerrainLoader : MonoBehaviour {
     float levelSmooth = 25;
     int checkLength = 5;
     float power = 7.0f;
-	bool flatTerrain = true;
+	bool flatTerrain = false;
 
     public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 
@@ -88,30 +88,34 @@ public class TerrainLoader : MonoBehaviour {
         }
         else
         {
-            for (int x = 0; x <= terrainResolution; x++)
+            for (int y = 0; y <= tileSize; y++)
             {
-                int pixelX = (int)Mathf.Round(x / 10);
-                int pixelY= (int)Mathf.Round(y / 10);
-                if (x == terrainResolution && y == terrainResolution)
+                for (int x = 0; x <= terrainResolution; x++)
                 {
-                    terrainHeights[y, x] = pixelByteArray[(pixelY-1) * tileSize + (pixelX-1)].grayscale * intensity;
-                }
-                else if (x == tileSize)
-                {
-                    terrainHeights[y, x] = pixelByteArray[(pixelY) * tileSize + (pixelX-1)].grayscale * intensity;
-                }
-                else if (y == tileSize)
-                {
-                    terrainHeights[y, x] = pixelByteArray[((pixelY-1) * tileSize) + pixelX].grayscale * intensity;
-                }
-                else
-                {
-                    try
+                    int pixelX = (int)Mathf.Round(x / 10);
+                    int pixelY = (int)Mathf.Round(y / 10);
+                    if (x == terrainResolution && y == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[pixelY * tileSize + pixelX].grayscale * intensity;
-                    }catch(Exception e)
+                        terrainHeights[y, x] = pixelByteArray[(pixelY - 1) * tileSize + (pixelX - 1)].grayscale * intensity;
+                    }
+                    else if (x == tileSize)
                     {
-                        Debug.Log(e);
+                        terrainHeights[y, x] = pixelByteArray[(pixelY) * tileSize + (pixelX - 1)].grayscale * intensity;
+                    }
+                    else if (y == tileSize)
+                    {
+                        terrainHeights[y, x] = pixelByteArray[((pixelY - 1) * tileSize) + pixelX].grayscale * intensity;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            terrainHeights[y, x] = pixelByteArray[pixelY * tileSize + pixelX].grayscale * intensity;
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.Log(e);
+                        }
                     }
                 }
             }
@@ -218,58 +222,6 @@ public class TerrainLoader : MonoBehaviour {
 
         return Mathf.Pow((Mathf.Pow(first, power) + Mathf.Pow(second, power)) / 2.0f, 1 / power);
     }
-
-    /*
-    IEnumerator setNeighbours()
-    {
-        foreach(TerrainTile tile in worldTiles.Values)
-        {
-            TerrainTile right;
-            TerrainTile left;
-            TerrainTile top;
-            TerrainTile bottom;
-
-            worldTiles.TryGetValue((tile.worldX + 1).ToString() + "_" + tile.worldZ.ToString(), out right);
-            worldTiles.TryGetValue((tile.worldX - 1).ToString() + "_" + tile.worldZ.ToString(), out left);
-            worldTiles.TryGetValue(tile.worldX.ToString() + "_" + (tile.worldZ + 1).ToString(), out top);
-            worldTiles.TryGetValue(tile.worldX.ToString() + "_" + (tile.worldZ - 1).ToString(), out bottom);
-
-            Terrain rightTerrain = null;
-            Terrain leftTerrain = null;
-            Terrain topTerrain = null;
-            Terrain bottomTerrain = null;
-
-            try {
-                rightTerrain = right.terrain.GetComponent<Terrain>();
-                StitchTerrains(tile.terrain.GetComponent<Terrain>(), rightTerrain, Side.Right);
-            } catch { } 
-
-            try {
-                leftTerrain = left.terrain.GetComponent<Terrain>();
-                StitchTerrains(tile.terrain.GetComponent<Terrain>(), leftTerrain, Side.Left);
-            } catch { }
-
-            try {
-                topTerrain = top.terrain.GetComponent<Terrain>();
-                StitchTerrains(tile.terrain.GetComponent<Terrain>(), topTerrain, Side.Top);
-            } catch { }
-
-            try {
-                bottomTerrain = bottom.terrain.GetComponent<Terrain>();
-                StitchTerrains(tile.terrain.GetComponent<Terrain>(), bottomTerrain, Side.Bottom);
-            } catch { }
-
-            //StitchTerrainsRepair(rightTerrain, leftTerrain, topTerrain, bottomTerrain);
-
-            try {
-                setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
-                tile.terrain.GetComponent<Terrain>().SetNeighbors(leftTerrain, topTerrain, rightTerrain, bottomTerrain);
-            } catch{ }
-        }
-
-        yield return null;
-    }
-    */
 
     void loadAllTerrain()
     {

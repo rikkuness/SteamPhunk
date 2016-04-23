@@ -8,18 +8,19 @@ public class MapShow : MonoBehaviour {
     public bool IsRunningOnMono;
 
     public GameObject MapCanvas; // Assign in inspector
-    public bool ToggleMapOn;
-    //public bool ToggleMapOff;
+    private bool ToggleMapOn;
+    private bool ToggleMapOff;
 
     // Use this for initialization
     void Start () {
         IsRunningOnMono = (Application.platform == RuntimePlatform.OSXEditor);
         ToggleMapOn = false;
-        //ToggleMapOff = false;
+        ToggleMapOff = false;
+        MapCanvas.SetActive(false);
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
 
         object controlState = null;
         if (!IsRunningOnMono)
@@ -27,21 +28,20 @@ public class MapShow : MonoBehaviour {
             controlState = GamePad.GetState(PlayerIndex.One);
         }
 
-        if (ToggleMapOn == true)
-        {
-            MapCanvas.SetActive(true);
-        } else
-        {
-            MapCanvas.SetActive(false);
-        }
-
         if (((GamePadState)controlState).Buttons.Back == ButtonState.Pressed)
         {
             ToggleMapOn = true;
         }
+
         if (((GamePadState)controlState).Buttons.Back == ButtonState.Released)
         {
+            if (ToggleMapOn == true)
+            {
+                ToggleMapOff = !ToggleMapOff;
+            }
             ToggleMapOn = false;
+            MapCanvas.SetActive(ToggleMapOff);
         }
+
     }
 }

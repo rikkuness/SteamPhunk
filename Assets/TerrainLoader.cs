@@ -52,6 +52,7 @@ public class TerrainLoader : MonoBehaviour {
     float levelSmooth = 25;
     int checkLength = 5;
     float power = 7.0f;
+	bool flatTerrain = true;
 
     public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 
@@ -75,9 +76,17 @@ public class TerrainLoader : MonoBehaviour {
         // Load colors into byte array
         Color[] pixelByteArray = tile.heightmap.GetPixels();
 
-        
-        // Iterate over the byte array and calculate heights
-        for (int y = 0; y <= terrainResolution; y++)
+        if (flatTerrain)
+        {
+            for (int y = 0; y <= tileSize; y++)
+            {
+                for (int x = 0; x <= tileSize; x++)
+                {
+                    terrainHeights[y, x] = 0f;
+                }
+            }
+        }
+        else
         {
             for (int x = 0; x <= terrainResolution; x++)
             {

@@ -19,6 +19,8 @@ public class WheelMotor
 }
 
 public class CuriosityControl : MonoBehaviour {
+	public bool IsRunningOnMono = (System.Type.GetType ("Mono.Runtime") != null);
+
     public List<WheelMotor> motors;
     public List<ControlArm> controlArms;
 
@@ -31,63 +33,65 @@ public class CuriosityControl : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        GamePadState controlState = GamePad.GetState(PlayerIndex.One);
+		object controlState = null;
+		if (! IsRunningOnMono) {
+			controlState = GamePad.GetState (PlayerIndex.One);
+		}
+		// Forward and backwards movement
+		foreach (WheelMotor motor in motors)
+		{
+			HingeJoint hinge = motor.motor.GetComponent<HingeJoint>();
+			JointMotor thisMotor = hinge.motor;
+			if (IsRunningOnMono || !((GamePadState)controlState).IsConnected)
+			{
+				thisMotor.targetVelocity = motorSpeed * Input.GetAxis("Horizontal");
+			}
+			else
+			{
+				thisMotor.targetVelocity = motorSpeed * (((GamePadState)controlState).Triggers.Right + -((GamePadState)controlState).Triggers.Left);
+			}
+			hinge.motor = thisMotor;
+		}
 
-        // Forward and backwards movement
-        foreach (WheelMotor motor in motors)
-        {
-            HingeJoint hinge = motor.motor.GetComponent<HingeJoint>();
-            JointMotor thisMotor = hinge.motor;
-            if (controlState.IsConnected)
-            {
-                thisMotor.targetVelocity = motorSpeed * (controlState.Triggers.Right + -controlState.Triggers.Left);
-            }
-            else
-            {
-                thisMotor.targetVelocity = motorSpeed * Input.GetAxis("Horizontal");
-            }
-            hinge.motor = thisMotor;
-        }
+		// Steering control
+		foreach(ControlArm controlArm in controlArms)
+		{
+			HingeJoint hinge = controlArm.controlArm.GetComponent<HingeJoint>();
+			JointSpring spring = hinge.spring;
+			if (IsRunningOnMono || !((GamePadState)controlState).IsConnected)
+			{
+				spring.targetPosition = steeringAngle * Input.GetAxis("Horizontal");
+			}else
+			{
+				spring.targetPosition = steeringAngle * ((GamePadState)controlState).ThumbSticks.Left.X; 
+			}
 
-        // Steering control
-        foreach(ControlArm controlArm in controlArms)
-        {
-            HingeJoint hinge = controlArm.controlArm.GetComponent<HingeJoint>();
-            JointSpring spring = hinge.spring;
-            if (controlState.IsConnected)
-            {
-                spring.targetPosition = steeringAngle * controlState.ThumbSticks.Left.X; 
-            }else
-            {
-                spring.targetPosition = steeringAngle * Input.GetAxis("Horizontal");
-            }
+			// Forklift steering
+			if (controlArm.inverse)
+			{
+				spring.targetPosition = -spring.targetPosition;
+			}
 
-            // Forklift steering
-            if (controlArm.inverse)
-            {
-                spring.targetPosition = -spring.targetPosition;
-            }
+			hinge.spring = spring;
+		}
 
-            hinge.spring = spring;
-        }
+		// Skid compensate
+		foreach (WheelMotor motor in motors)
+		{
+			HingeJoint wheelhinge = motor.motor.GetComponent<HingeJoint>();
+			JointMotor thisMotor = wheelhinge.motor;
+			if (motor.leftSide && Input.GetAxis("Horizontal") < 0)
+			{
+				thisMotor.targetVelocity = thisMotor.targetVelocity / skidCompensation;
+			}
+			else if(!(motor.leftSide) && Input.GetAxis("Horizontal") > 0)
+			{
+				thisMotor.targetVelocity = thisMotor.targetVelocity * skidCompensation;
+			}
+			wheelhinge.motor = thisMotor;
+		}
 
-        // Skid compensate
-        foreach (WheelMotor motor in motors)
-        {
-            HingeJoint wheelhinge = motor.motor.GetComponent<HingeJoint>();
-            JointMotor thisMotor = wheelhinge.motor;
-            if (motor.leftSide && Input.GetAxis("Horizontal") < 0)
-            {
-                thisMotor.targetVelocity = thisMotor.targetVelocity / skidCompensation;
-            }
-            else if(!(motor.leftSide) && Input.GetAxis("Horizontal") > 0)
-            {
-                thisMotor.targetVelocity = thisMotor.targetVelocity * skidCompensation;
-            }
-            wheelhinge.motor = thisMotor;
-        }
-
-        // Self righting
-        transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
+		// Self righting
+		transform.localEulerAngles = new Vector3(0, transform.localEulerAngles.y, transform.localEulerAngles.z);
     }
 }

@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\ChaseCamera.cs" />
      <Compile Include="Assets\CuriosityControl.cs" />
+     <Compile Include="Assets\MapShow.cs" />
      <Compile Include="Assets\MinimapCameraScript.cs" />
      <Compile Include="Assets\PointUtility.cs" />
      <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\IntArrayComparer.cs" />

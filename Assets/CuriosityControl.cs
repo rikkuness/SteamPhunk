@@ -47,7 +47,7 @@ public class CuriosityControl : MonoBehaviour {
 			JointMotor thisMotor = hinge.motor;
 			if (IsRunningOnMono || !((GamePadState)controlState).IsConnected)
 			{
-				thisMotor.targetVelocity = motorSpeed * Input.GetAxis("Horizontal");
+				thisMotor.targetVelocity = motorSpeed * Input.GetAxis("Vertical");
 			}
 			else
 			{

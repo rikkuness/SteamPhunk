@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq; // used for Sum of array
+using CSML;
 
 [System.Serializable]
 public class TerrainTile
@@ -42,24 +44,18 @@ public class TerrainLoader : MonoBehaviour {
     public int terrainHeight = 100;
     public float intensity = 1f;
 
-    public List<TerrainTile> worldTiles;
+    enum Side { Left, Right, Top, Bottom }
 
-    // Use this for initialization
-    void Start() {
-        worldTiles.Add(new TerrainTile(9, 38, 5, 0, 0));
-        worldTiles.Add(new TerrainTile(8, 38, 5, 0, 1));
-        worldTiles.Add(new TerrainTile(9, 39, 5, 1, 0));
-        worldTiles.Add(new TerrainTile(8, 39, 5, 1, 1));
-        
+    public Vector2 firstPosition;
+    float levelSmooth = 25;
+    int checkLength = 5;
+    float power = 7.0f;
 
-        // Initial tile loading
-        loadAllTerrain();
-    }
+    public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 
     IEnumerator loadTerrainTile(TerrainTile tile)
     {
         // Create and position GameObject
-        Vector3 position = new Vector3(tile.y * terrainSize, 0, tile.x * terrainSize);
         var terrainData = new TerrainData();
         terrainData.heightmapResolution = tileSize;
         terrainData.alphamapResolution = tileSize;
@@ -82,13 +78,17 @@ public class TerrainLoader : MonoBehaviour {
         {
             for (int x = 0; x <= tileSize; x++)
             {
-                if (x == tileSize)
+                if (x == tileSize && y == tileSize)
                 {
-                    terrainHeights[y, x] = 0.3f;//pixelByteArray[y * tileSize + x - 1].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale * intensity;
+                }
+                else if (x == tileSize)
+                {
+                    terrainHeights[y, x] = pixelByteArray[y * tileSize + (x - 1)].grayscale * intensity;
                 }
                 else if (y == tileSize)
                 {
-                    terrainHeights[y, x] = 0.2f;//pixelByteArray[(y - 1) * tileSize + x].grayscale * intensity;
+                    terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale * intensity;
                 }
                 else
                 {
@@ -107,8 +107,6 @@ public class TerrainLoader : MonoBehaviour {
         tile.terrain.transform.position = new Vector3(tile.worldX * tileSize, 0, tile.worldZ * tileSize);
 
         tile.terrain.name = "tile_" + tile.x.ToString() + "_" + tile.y.ToString();
-
-        setTextures(terrainData);
 
         yield return null;
     }
@@ -194,11 +192,174 @@ public class TerrainLoader : MonoBehaviour {
         // Finally assign the new splatmap to the terrainData:
         terrainData.SetAlphamaps(0, 0, splatmapData);
     }
+
+    float average(float first, float second)
+    {
+
+        return Mathf.Pow((Mathf.Pow(first, power) + Mathf.Pow(second, power)) / 2.0f, 1 / power);
+    }
+
+    IEnumerator setNeighbours()
+    {
+        foreach(TerrainTile tile in worldTiles.Values)
+        {
+            TerrainTile right;
+            TerrainTile left;
+            TerrainTile top;
+            TerrainTile bottom;
+
+            worldTiles.TryGetValue((tile.worldX + 1).ToString() + "_" + tile.worldZ.ToString(), out right);
+            worldTiles.TryGetValue((tile.worldX - 1).ToString() + "_" + tile.worldZ.ToString(), out left);
+            worldTiles.TryGetValue(tile.worldX.ToString() + "_" + (tile.worldZ + 1).ToString(), out top);
+            worldTiles.TryGetValue(tile.worldX.ToString() + "_" + (tile.worldZ - 1).ToString(), out bottom);
+
+            Terrain rightTerrain = null;
+            Terrain leftTerrain = null;
+            Terrain topTerrain = null;
+            Terrain bottomTerrain = null;
+
+            try {
+                rightTerrain = right.terrain.GetComponent<Terrain>();
+                StitchTerrains(tile.terrain.GetComponent<Terrain>(), rightTerrain, Side.Right);
+            } catch (Exception e){ Debug.Log(e); }
+
+            try {
+                leftTerrain = left.terrain.GetComponent<Terrain>();
+                StitchTerrains(tile.terrain.GetComponent<Terrain>(), leftTerrain, Side.Left);
+            } catch (Exception e) { Debug.Log(e); }
+
+            try {
+                topTerrain = top.terrain.GetComponent<Terrain>();
+                StitchTerrains(tile.terrain.GetComponent<Terrain>(), topTerrain, Side.Top);
+            } catch (Exception e) { Debug.Log(e); }
+
+            try {
+                bottomTerrain = bottom.terrain.GetComponent<Terrain>();
+                StitchTerrains(tile.terrain.GetComponent<Terrain>(), bottomTerrain, Side.Bottom);
+            } catch (Exception e) { Debug.Log(e); }
+
+            //StitchTerrainsRepair(rightTerrain, leftTerrain, topTerrain, bottomTerrain);
+
+            setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+
+            tile.terrain.GetComponent<Terrain>().SetNeighbors(leftTerrain, topTerrain, rightTerrain, bottomTerrain);
+        }
+
+        yield return null;
+    }
+
+    void StitchTerrains(Terrain terrain, Terrain second, Side side, bool smooth = true)
+    {
+        TerrainData terrainData = terrain.terrainData;
+        TerrainData secondData = second.terrainData;
+        
+        float[,] heights = terrainData.GetHeights(0, 0, terrainData.heightmapWidth, terrainData.heightmapHeight);
+        float[,] secondHeights = secondData.GetHeights(0, 0, secondData.heightmapWidth, secondData.heightmapHeight);
+        
+        if (side == Side.Right)
+        {
+            int y = heights.GetLength(0) - 1;
+            int x = 0;
+            int y2 = 0;
+            for (x = 0; x < heights.GetLength(1); x++)
+            {
+
+                heights[x, y] = average(heights[x, y], secondHeights[x, y2]);
+
+                if (smooth)
+                    heights[x, y] += Mathf.Abs(heights[x, y - 1] - secondHeights[x, y2 + 1]) / levelSmooth;
+
+                secondHeights[x, y2] = heights[x, y];
+
+                for (int i = 1; i < checkLength; i++)
+                {
+                    heights[x, y - i] = (average(heights[x, y - i], heights[x, y - i + 1]) + Mathf.Abs(heights[x, y - i] - heights[x, y - i + 1]) / levelSmooth) * (checkLength - i) / checkLength + heights[x, y - i] * i / checkLength;
+                    secondHeights[x, y2 + i] = (average(secondHeights[x, y2 + i], secondHeights[x, y2 + i - 1]) + Mathf.Abs(secondHeights[x, y2 + i] - secondHeights[x, y2 + i - 1]) / levelSmooth) * (checkLength - i) / checkLength + secondHeights[x, y2 + i] * i / checkLength;
+                }
+            }
+        }
+        else
+        {
+            if (side == Side.Top)
+            {
+                int y = 0;
+                int x = heights.GetLength(0) - 1;
+                int x2 = 0;
+                for (y = 0; y < heights.GetLength(1); y++)
+                {
+
+                    heights[x, y] = average(heights[x, y], secondHeights[x2, y]);
+
+                    if (smooth)
+                        heights[x, y] += Mathf.Abs(heights[x - 1, y] - secondHeights[x2 + 1, y]) / levelSmooth;
+
+
+                    secondHeights[x2, y] = heights[x, y];
+
+                    for (int i = 1; i < checkLength; i++)
+                    {
+                        heights[x - i, y] = (average(heights[x - i, y], heights[x - i + 1, y]) + Mathf.Abs(heights[x - i, y] - heights[x - i + 1, y]) / levelSmooth) * (checkLength - i) / checkLength + heights[x - i, y] * i / checkLength;
+                        secondHeights[x2 + i, y] = (average(secondHeights[x2 + i, y], secondHeights[x2 + i - 1, y]) + Mathf.Abs(secondHeights[x2 + i, y] - secondHeights[x2 + i - 1, y]) / levelSmooth) * (checkLength - i) / checkLength + secondHeights[x2 + i, y] * i / checkLength;
+                    }
+
+                }
+            }
+        }
+
+
+        terrainData.SetHeights(0, 0, heights);
+        terrain.terrainData = terrainData;
+
+        secondData.SetHeights(0, 0, secondHeights);
+        second.terrainData = secondData;
+
+        terrain.Flush();
+        second.Flush();
+    }
+
+    void StitchTerrainsRepair(Terrain terrain11, Terrain terrain21, Terrain terrain12, Terrain terrain22)
+    {
+        int size = terrain11.terrainData.heightmapHeight - 1;
+        int size0 = 0;
+        List<float> heights = new List<float>();
+        
+        heights.Add(terrain11.terrainData.GetHeights(size, size0, 1, 1)[0, 0]);
+        heights.Add(terrain21.terrainData.GetHeights(size0, size0, 1, 1)[0, 0]);
+        heights.Add(terrain12.terrainData.GetHeights(size, size, 1, 1)[0, 0]);
+        heights.Add(terrain22.terrainData.GetHeights(size0, size, 1, 1)[0, 0]);
+        
+        float[,] height = new float[1, 1];
+        height[0, 0] = heights.Max();
+
+        terrain11.terrainData.SetHeights(size, size0, height);
+        terrain21.terrainData.SetHeights(size0, size0, height);
+        terrain12.terrainData.SetHeights(size, size, height);
+        terrain22.terrainData.SetHeights(size0, size, height);
+
+        terrain11.Flush();
+        terrain12.Flush();
+        terrain21.Flush();
+        terrain22.Flush();
+    }
+
     void loadAllTerrain()
     {
-        foreach(TerrainTile tile in worldTiles)
+        foreach(TerrainTile tile in worldTiles.Values)
         {
             StartCoroutine(loadTerrainTile(tile));
+            StartCoroutine(setNeighbours());
         }
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        worldTiles["0_0"] = new TerrainTile(9, 38, 5, 0, 0);
+        worldTiles["0_1"] = new TerrainTile(8, 38, 5, 0, 1);
+        worldTiles["1_0"] = new TerrainTile(9, 39, 5, 1, 0);
+        worldTiles["1_1"] = new TerrainTile(8, 39, 5, 1, 1);
+
+        // Initial tile loading
+        loadAllTerrain();
     }
 }

@@ -68,7 +68,12 @@
   <ItemGroup>
     <Compile Include="Assets\ChaseCamera.cs" />
     <Compile Include="Assets\CuriosityControl.cs" />
+    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\IntArrayComparer.cs" />
+    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\TerrainNeighbours.cs" />
+    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Third Party\Complex.cs" />
+    <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\Third Party\Matrix.cs" />
     <Compile Include="Assets\TerrainLoader.cs" />
+    <Compile Include="Assets\TerrainTools.cs" />
     <Compile Include="Assets\UIMap.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />

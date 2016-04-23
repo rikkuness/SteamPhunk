@@ -1,4 +1,0 @@
-sceneSetups:
-- path: G:/Documents/UnitySlippyMap/Assets/Scenes/Test.unity
-  isLoaded: 1
-  isActive: 1

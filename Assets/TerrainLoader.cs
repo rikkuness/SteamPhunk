@@ -221,26 +221,26 @@ public class TerrainLoader : MonoBehaviour {
             try {
                 rightTerrain = right.terrain.GetComponent<Terrain>();
                 StitchTerrains(tile.terrain.GetComponent<Terrain>(), rightTerrain, Side.Right);
-            } catch (Exception e){ Debug.Log(e); }
+            } catch { } 
 
             try {
                 leftTerrain = left.terrain.GetComponent<Terrain>();
                 StitchTerrains(tile.terrain.GetComponent<Terrain>(), leftTerrain, Side.Left);
-            } catch (Exception e) { Debug.Log(e); }
+            } catch { }
 
             try {
                 topTerrain = top.terrain.GetComponent<Terrain>();
                 StitchTerrains(tile.terrain.GetComponent<Terrain>(), topTerrain, Side.Top);
-            } catch (Exception e) { Debug.Log(e); }
+            } catch { }
 
             try {
                 bottomTerrain = bottom.terrain.GetComponent<Terrain>();
                 StitchTerrains(tile.terrain.GetComponent<Terrain>(), bottomTerrain, Side.Bottom);
-            } catch (Exception e) { Debug.Log(e); }
+            } catch { }
 
             //StitchTerrainsRepair(rightTerrain, leftTerrain, topTerrain, bottomTerrain);
 
-            setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
+            try { setTextures(tile.terrain.GetComponent<Terrain>().terrainData); }catch{ }
 
             tile.terrain.GetComponent<Terrain>().SetNeighbors(leftTerrain, topTerrain, rightTerrain, bottomTerrain);
         }

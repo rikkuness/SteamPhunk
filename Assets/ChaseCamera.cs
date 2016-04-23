@@ -3,7 +3,8 @@ using System.Collections;
 using XInputDotNetPure;
 
 public class ChaseCamera : MonoBehaviour {
-	public bool IsRunningOnMono = (System.Type.GetType ("Mono.Runtime") != null);
+    //public bool IsRunningOnMono = (System.Type.GetType ("Mono.Runtime") != null);
+    public bool IsRunningOnMono;
 
     public GameObject targetObject;
     public float panSpeed = 1f;
@@ -20,6 +21,7 @@ public class ChaseCamera : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        IsRunningOnMono = (Application.platform == RuntimePlatform.OSXEditor);
         target = targetObject.transform;
         offset = new Vector3(0, height, -distance);
     }

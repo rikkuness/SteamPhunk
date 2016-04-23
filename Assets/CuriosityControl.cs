@@ -19,7 +19,7 @@ public class WheelMotor
 }
 
 public class CuriosityControl : MonoBehaviour {
-	public bool IsRunningOnMono = (System.Type.GetType ("Mono.Runtime") != null);
+	public bool IsRunningOnMono;
 
     public List<WheelMotor> motors;
     public List<ControlArm> controlArms;
@@ -29,7 +29,10 @@ public class CuriosityControl : MonoBehaviour {
     public float rollSpeed = 1f;
     public float skidCompensation = 1f;
 
-    
+    void Start()
+    { 
+        IsRunningOnMono = (Application.platform == RuntimePlatform.OSXEditor);
+    }
 
     // Update is called once per frame
     void Update () {

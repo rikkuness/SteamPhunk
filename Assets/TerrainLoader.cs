@@ -51,6 +51,7 @@ public class TerrainLoader : MonoBehaviour {
     float levelSmooth = 25;
     int checkLength = 5;
     float power = 7.0f;
+	bool flatTerrain = true;
 
     public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 
@@ -71,32 +72,48 @@ public class TerrainLoader : MonoBehaviour {
         // Multidimensional array of this tiles heights in x/y
         float[,] terrainHeights = terrainData.GetHeights(0, 0, tileSize + 1, tileSize + 1);
 
-        // Load colors into byte array
-        Color[] pixelByteArray = tile.heightmap.GetPixels();
+		if ( flatTerrain )
+		{
+			for (int y = 0; y <= tileSize; y++)
+			{
+				for (int x = 0; x <= tileSize; x++)
+				{
+					terrainHeights [y, x] = 0f;
+				}
+			}
+		}
+		else
+		{
+			// Load colors into byte array
+			Color[] pixelByteArray = tile.heightmap.GetPixels ();
     
-        // Iterate over the byte array and calculate heights
-        for (int y = 0; y <= tileSize; y++)
-        {
-            for (int x = 0; x <= tileSize; x++)
-            {
-                if (x == tileSize && y == tileSize)
-                {
-                    terrainHeights[y, x] = pixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale * intensity;
-                }
-                else if (x == tileSize)
-                {
-                    terrainHeights[y, x] = pixelByteArray[y * tileSize + (x - 1)].grayscale * intensity;
-                }
-                else if (y == tileSize)
-                {
-                    terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale * intensity;
-                }
-                else
-                {
-                    terrainHeights[y, x] = pixelByteArray[y * tileSize + x].grayscale * intensity;
-                }
-            }
-        }
+			// Iterate over the byte array and calculate heights
+			for (int y = 0; y <= tileSize; y++)
+			{
+				for (int x = 0; x <= tileSize; x++)
+				{
+					if ( x == tileSize && y == tileSize )
+					{
+						terrainHeights [y, x] = pixelByteArray [(y - 1) * tileSize + (x - 1)].grayscale * intensity;
+					}
+					else
+					if ( x == tileSize )
+					{
+						terrainHeights [y, x] = pixelByteArray [y * tileSize + (x - 1)].grayscale * intensity;
+					}
+					else
+					if ( y == tileSize )
+					{
+						terrainHeights [y, x] = pixelByteArray [((y - 1) * tileSize) + x].grayscale * intensity;
+					}
+					else
+					{
+						terrainHeights [y, x] = pixelByteArray [y * tileSize + x].grayscale * intensity;
+					}
+				}
+			}
+		}
+
 
         // Use the newly populated height data to apply the heightmap
         terrainData.SetHeights(0, 0, terrainHeights);

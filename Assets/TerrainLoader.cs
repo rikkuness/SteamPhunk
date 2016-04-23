@@ -46,10 +46,11 @@ public class TerrainLoader : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-        worldTiles.Add(new TerrainTile(8, 39, 5, 0, 1));
-        worldTiles.Add(new TerrainTile(9, 39, 5, 0, 0));
-        worldTiles.Add(new TerrainTile(9, 39, 5, 1, 1));
-        worldTiles.Add(new TerrainTile(8, 38, 5, 1, 0));
+        worldTiles.Add(new TerrainTile(9, 38, 5, 0, 0));
+        worldTiles.Add(new TerrainTile(8, 38, 5, 0, 1));
+        worldTiles.Add(new TerrainTile(9, 39, 5, 1, 0));
+        worldTiles.Add(new TerrainTile(8, 39, 5, 1, 1));
+        
 
         // Initial tile loading
         loadAllTerrain();

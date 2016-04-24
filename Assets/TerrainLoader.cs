@@ -52,7 +52,7 @@ public class TerrainLoader : MonoBehaviour {
     float levelSmooth = 25;
     int checkLength = 5;
     float power = 7.0f;
-	bool flatTerrain = false;
+	public bool flatTerrain = false;
 
     public Dictionary<string, TerrainTile> worldTiles = new Dictionary<string, TerrainTile>();
 

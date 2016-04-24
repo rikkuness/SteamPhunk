@@ -233,7 +233,7 @@ public class TerrainLoader : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        loadTilesAround(12, 8, 2);
+        loadTilesAround(16, 56, 2);
 
         // Initial tile loading
         loadAllTerrain();

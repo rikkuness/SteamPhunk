@@ -2,11 +2,13 @@
 using System.Collections;
 
 public class POI_marker : MonoBehaviour {
-	public string poi_name;
+	public string title;
+	public string body;
 
 	// Use this for initialization
 	void Start () {
-		poi_name = "Curiosity landing point";
+		title = "Curiosity landing point";
+		body = "Super cool stuff goes on at this site!!!";
 	}
 	
 	// Update is called once per frame

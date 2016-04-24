@@ -58,6 +58,12 @@
     <Reference Include="UnityEngine.Networking">
       <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.Networking">
+      <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEditor">
       <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
     </Reference>
@@ -69,7 +75,9 @@
     <Compile Include="Assets\ChaseCamera.cs" />
     <Compile Include="Assets\CuriosityControl.cs" />
     <Compile Include="Assets\DayNightController.cs" />
+    <Compile Include="Assets\MapShow.cs" />
     <Compile Include="Assets\MinimapCameraScript.cs" />
+    <Compile Include="Assets\POI_marker.cs" />
     <Compile Include="Assets\PointUtility.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\IntArrayComparer.cs" />
     <Compile Include="Assets\Terrain Stitch\Terrain Stitch Scripts\TerrainNeighbours.cs" />
@@ -79,6 +87,7 @@
     <Compile Include="Assets\TerrainLoader.cs" />
     <Compile Include="Assets\TerrainTools.cs" />
     <Compile Include="Assets\UIMap.cs" />
+    <Compile Include="Assets\poi_collector.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

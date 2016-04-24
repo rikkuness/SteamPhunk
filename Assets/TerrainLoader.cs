@@ -42,9 +42,10 @@ public class TerrainLoader : MonoBehaviour {
 
     public int tileSize = 256;
     public int terrainSize = 256;
-    public int terrainResolution = 2560;
+    public int terrainResolution = 2048;
     public int terrainHeight = 100;
     public float intensity = 1f;
+    public float smoothing = 0.05f;
 
     enum Side { Left, Right, Top, Bottom }
 
@@ -60,18 +61,18 @@ public class TerrainLoader : MonoBehaviour {
     {
         // Create and position GameObject
         var terrainData = new TerrainData();
-        terrainData.heightmapResolution = tileSize;
+        terrainData.heightmapResolution = terrainResolution;
         terrainData.alphamapResolution = tileSize;
 
         // Download the tile heightmap
         tile.url = baseUrl + tile.z + "/" + tile.x + "/" + tile.y + ".png";
         WWW www = new WWW(tile.url);
         while (!www.isDone) { }
-        tile.heightmap = new Texture2D(tileSize/10, tileSize/10);
+        tile.heightmap = new Texture2D(terrainResolution, terrainResolution); //2049
         www.LoadImageIntoTexture(tile.heightmap);
     
         // Multidimensional array of this tiles heights in x/y
-        float[,] terrainHeights = terrainData.GetHeights(0, 0, tileSize + 1, tileSize + 1);
+        float[,] terrainHeights = terrainData.GetHeights(0, 0, terrainResolution + 1, terrainResolution + 1);
 
         // Load colors into byte array
         Color[] pixelByteArray = tile.heightmap.GetPixels();
@@ -88,34 +89,25 @@ public class TerrainLoader : MonoBehaviour {
         }
         else
         {
-            for (int y = 0; y <= tileSize; y++)
+            for (int y = 0; y <= terrainResolution; y++)
             {
                 for (int x = 0; x <= terrainResolution; x++)
                 {
-                    int pixelX = (int)Mathf.Round(x / 10);
-                    int pixelY = (int)Mathf.Round(y / 10);
                     if (x == terrainResolution && y == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[(pixelY - 1) * tileSize + (pixelX - 1)].grayscale * intensity;
+                        terrainHeights[y, x] = pixelByteArray[(y - 1) * tileSize + (x - 1)].grayscale * intensity;
                     }
-                    else if (x == tileSize)
+                    else if (x == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[(pixelY) * tileSize + (pixelX - 1)].grayscale * intensity;
+                        terrainHeights[y, x] = pixelByteArray[(y) * tileSize + (x - 1)].grayscale * intensity;
                     }
-                    else if (y == tileSize)
+                    else if (y == terrainResolution)
                     {
-                        terrainHeights[y, x] = pixelByteArray[((pixelY - 1) * tileSize) + pixelX].grayscale * intensity;
+                        terrainHeights[y, x] = pixelByteArray[((y - 1) * tileSize) + x].grayscale * intensity;
                     }
                     else
                     {
-                        try
-                        {
-                            terrainHeights[y, x] = pixelByteArray[pixelY * tileSize + pixelX].grayscale * intensity;
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.Log(e);
-                        }
+                        terrainHeights[y, x] = pixelByteArray[y * tileSize + x].grayscale * intensity;
                     }
                 }
             }
@@ -217,11 +209,6 @@ public class TerrainLoader : MonoBehaviour {
         terrainData.SetAlphamaps(0, 0, splatmapData);
     }
 
-    float average(float first, float second)
-    {
-
-        return Mathf.Pow((Mathf.Pow(first, power) + Mathf.Pow(second, power)) / 2.0f, 1 / power);
-    }
 
     void loadAllTerrain()
     {
@@ -231,31 +218,22 @@ public class TerrainLoader : MonoBehaviour {
         }
     }
 
-    void loadTilesAround(int z, int x)
+    void loadTilesAround(int z, int x, int margin)
     {
-        /*      -1,-1   -1,0    -1,1
-         *       0,-1    0,0     0,1
-         *       1,-1    1,0     1,1
-         */
-
-        worldTiles["-1_-1"] = new TerrainTile(z+1,  x-1, -1, -1);
-        worldTiles["-1_0"] = new TerrainTile( z+1,  x,   -1,  0);
-        worldTiles["-1_1"] = new TerrainTile( z+1,  x+1, -1,  1);
-
-        worldTiles["0_-1"] = new TerrainTile( z,    x-1,  0, -1);
-        worldTiles["0_0"] = new TerrainTile(  z,    x,    0,  0);
-        worldTiles["0_1"] = new TerrainTile(  z,    x+1,  0,  1);
-
-        worldTiles["1_-1"] = new TerrainTile( z-1,  x-1,  1, -1);
-        worldTiles["1_0"] = new TerrainTile(  z-1,  x,    1,  0);
-        worldTiles["1_1"] = new TerrainTile(  z-1,  x+1,  1,  1);
+        for(int tilex = x - margin; tilex < x + margin; tilex++)
+        {
+            for (int tilez = z - margin; tilez < z + margin; tilez++)
+            {
+                worldTiles[tilex.ToString() + "_" + tilez.ToString()] = new TerrainTile(
+                    tilez, tilex, tilez + z, tilex + x);
+            }
+        }
     }
 
     // Use this for initialization
     void Start()
     {
-        // Load 3x3 grid centered around given x/y tile
-        loadTilesAround(12, 8);
+        loadTilesAround(12, 8, 2);
 
         // Initial tile loading
         loadAllTerrain();

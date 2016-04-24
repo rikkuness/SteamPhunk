@@ -9,7 +9,7 @@ namespace TerrainStitch
 	/// <summary>
 	/// Terrain stitch editor.
 	/// </summary>
-	public class TerrainStitchEditor : MonoBehaviour
+	public class TerrainStitchEditor
 	{
 		/// <summary>
 		/// The first position for terrain tile management.

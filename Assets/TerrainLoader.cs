@@ -150,5 +150,6 @@ public class TerrainLoader : MonoBehaviour {
         {
             GetComponent<TerrainTextures>().setTextures(tile.terrain.GetComponent<Terrain>().terrainData);
         }
+        
     }
 }

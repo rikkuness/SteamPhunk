@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEditor;
+//using UnityEditor;
 using System.Collections.Generic;
 using CSML;
 using System.Linq;
@@ -70,17 +70,17 @@ namespace TerrainStitch
 		/// <summary>
 		/// Init this instance.
 		/// </summary>
-		[MenuItem ("Tools/Terrain Stitcher")]
+		//[MenuItem ("Tools/Terrain Stitcher")]
 		static void Init ()
 		{
-			EditorWindow.GetWindow (typeof(TerrainStitchEditor), false, "Terrain Stitcher");
+			//EditorWindow.GetWindow (typeof(TerrainStitchEditor), false, "Terrain Stitcher");
 				
 		}
 
 		/// <summary>
 		/// Raises the GU event.
 		/// </summary>
-		void OnGUI ()
+		/*void OnGUI ()
 		{
 			
 			GUILayout.Label ("Settings", EditorStyles.boldLabel);
@@ -133,7 +133,7 @@ namespace TerrainStitch
 				}
 			}
 
-		}
+		}*/
 
 
 		/// <summary>
@@ -152,7 +152,7 @@ namespace TerrainStitch
 		/// Randoms the noise on terrains.
 		/// </summary>
 		/// <param name="selected">If set to <c>true</c> selected.</param>
-		public void  RandomNoise (bool selected = false)
+		/*public void  RandomNoise (bool selected = false)
 		{
 			List<Terrain> terrains = new List<Terrain> ();
 			if (selected) {
@@ -191,7 +191,7 @@ namespace TerrainStitch
 			}
 		
 			terrain.terrainData.SetHeights (0, 0, heights);
-		}
+		}*/
 
 		#endregion
 
@@ -211,18 +211,18 @@ namespace TerrainStitch
 
 			List<Terrain> terrains = new List<Terrain> ();
 			if (selected) {
-				foreach (var item in Selection.gameObjects) {
+				/*foreach (var item in Selection.gameObjects) {
 					Terrain terrain = item.GetComponent<Terrain> ();
 					if (terrain != null)
 						terrains.Add (terrain);
-				}
+				}*/
 			} else
 				terrains.AddRange (Terrain.activeTerrains);
 
 			_terrains = terrains.ToArray ();
 
 			foreach (var t in terrains) {
-				Undo.RegisterUndo (t.terrainData, "Stitch terrains");
+				//Undo.RegisterUndo (t.terrainData, "Stitch terrains");
 			}
 
 

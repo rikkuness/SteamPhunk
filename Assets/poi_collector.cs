@@ -24,6 +24,7 @@ public class poi_collector : MonoBehaviour {
 
 	void OnTriggerEnter (Collider col)
 	{
+        Debug.Log("hey there");
 		POI_marker m = col.gameObject.GetComponent < POI_marker> ();
 		hud_title.text = m.title;
 		hud_body.text = m.body;
@@ -32,7 +33,8 @@ public class poi_collector : MonoBehaviour {
 
 	void OnTriggerExit (Collider col)
 	{
-		hud_title.text = "null";
+        Debug.Log("hey there beef");
+        hud_title.text = "null";
 		hud_body.text = "null";
 		disp.SetActive (false);
 	}

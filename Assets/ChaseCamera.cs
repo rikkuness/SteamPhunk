@@ -3,7 +3,6 @@ using System.Collections;
 using XInputDotNetPure;
 
 public class ChaseCamera : MonoBehaviour {
-    //public bool IsRunningOnMono = (System.Type.GetType ("Mono.Runtime") != null);
     public bool IsRunningOnMono;
 
     public GameObject targetObject;

@@ -23,25 +23,31 @@ public class MapShow : MonoBehaviour {
     void Update () {
 
         object controlState = null;
-        if (!IsRunningOnMono)
-        {
-            controlState = GamePad.GetState(PlayerIndex.One);
-        }
+		if (!IsRunningOnMono) {
+			controlState = GamePad.GetState (PlayerIndex.One);
 
-        if (((GamePadState)controlState).Buttons.Back == ButtonState.Pressed)
-        {
-            ToggleMapOn = true;
-        }
+			if (((GamePadState)controlState).Buttons.Back == ButtonState.Pressed) {
+				ToggleMapOn = true;
+			}
 
-        if (((GamePadState)controlState).Buttons.Back == ButtonState.Released)
-        {
-            if (ToggleMapOn == true)
-            {
-                ToggleMapOff = !ToggleMapOff;
-            }
-            ToggleMapOn = false;
-            MapCanvas.SetActive(ToggleMapOff);
-        }
+			if (((GamePadState)controlState).Buttons.Back == ButtonState.Released) {
+				if (ToggleMapOn == true) {
+					ToggleMapOff = !ToggleMapOff;
+				}
+				ToggleMapOn = false;
+				MapCanvas.SetActive (ToggleMapOff);
+			}
+		} else {
+			if (Input.GetKeyDown ("space")) {
+				ToggleMapOn = true;
+			}
 
-    }
+			if (Input.GetKeyUp ("space")) {
+				ToggleMapOff = !ToggleMapOff;
+
+			}
+			ToggleMapOn = false;
+			MapCanvas.SetActive (ToggleMapOff);
+		}
+	}
 }
